@@ -1,0 +1,175 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap");
+
+.login-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  position: relative;
+  overflow: hidden;
+  font-family: "Poppins", sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(139, 92, 246, 0.45), transparent 32%),
+    radial-gradient(circle at bottom right, rgba(6, 182, 212, 0.35), transparent 32%),
+    linear-gradient(135deg, #020617, #111827, #1e1b4b);
+}
+
+.login-card {
+  width: 430px;
+  max-width: 92%;
+  padding: 38px;
+  border-radius: 30px;
+  position: relative;
+  z-index: 5;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 25px 90px rgba(0, 0, 0, 0.38);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(22px);
+  color: white;
+  animation: cardUp 0.8s ease;
+}
+
+.logo-box {
+  width: 68px;
+  height: 68px;
+  border-radius: 22px;
+  display: grid;
+  place-items: center;
+  font-size: 34px;
+  font-weight: 800;
+  margin: 0 auto 18px;
+  background: linear-gradient(135deg, #8b5cf6, #06b6d4, #22c55e);
+  box-shadow: 0 15px 40px rgba(6, 182, 212, 0.42);
+}
+
+.login-card h1 {
+  text-align: center;
+  margin: 0;
+  font-size: 34px;
+}
+
+.tagline {
+  text-align: center;
+  color: #cbd5e1;
+  margin: 8px 0 30px;
+  font-size: 14px;
+}
+
+.input-group {
+  margin-bottom: 18px;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #e5e7eb;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 15px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  outline: none;
+  color: white;
+  font-size: 15px;
+  background: rgba(255, 255, 255, 0.12);
+  transition: 0.25s;
+}
+
+.input-group input::placeholder {
+  color: #94a3b8;
+}
+
+.input-group input:focus {
+  border-color: #22d3ee;
+  box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.15);
+}
+
+.login-btn {
+  width: 100%;
+  padding: 15px;
+  margin-top: 8px;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #7c3aed, #06b6d4);
+  box-shadow: 0 14px 35px rgba(6, 182, 212, 0.3);
+  transition: 0.25s;
+}
+
+.login-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 45px rgba(6, 182, 212, 0.45);
+}
+
+.switch-text {
+  text-align: center;
+  margin-top: 22px;
+  color: #cbd5e1;
+  font-size: 14px;
+}
+
+.switch-text a {
+  color: #67e8f9;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.circle {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(2px);
+  opacity: 0.7;
+  animation: float 7s ease-in-out infinite;
+}
+
+.circle-one {
+  width: 170px;
+  height: 170px;
+  background: #8b5cf6;
+  top: 10%;
+  left: 12%;
+}
+
+.circle-two {
+  width: 210px;
+  height: 210px;
+  background: #06b6d4;
+  bottom: 12%;
+  right: 10%;
+  animation-delay: 1.5s;
+}
+
+.circle-three {
+  width: 90px;
+  height: 90px;
+  background: #22c55e;
+  top: 18%;
+  right: 22%;
+  animation-delay: 2.5s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(-24px) translateX(18px);
+  }
+}
+
+@keyframes cardUp {
+  from {
+    opacity: 0;
+    transform: translateY(35px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
