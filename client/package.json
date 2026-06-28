@@ -12,6 +12,7 @@
   "dependencies": {
     "@jitsi/react-sdk": "^1.4.4",
     "@livekit/components-react": "^2.9.21",
+    "@livekit/components-styles": "^1.2.0",
     "axios": "^1.18.1",
     "emoji-picker-react": "^4.19.1",
     "livekit-client": "^2.20.0",
