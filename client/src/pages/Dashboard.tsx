@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./Dashboard.css";
+
+const API_URL = "https://vartalap-backend-hz3z.onrender.com";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -19,13 +21,22 @@ function Dashboard() {
     translations: 0,
   });
 
+  const today = useMemo(() => {
+    return new Date().toLocaleDateString("en-IN", {
+      weekday: "short",
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  }, []);
+
   useEffect(() => {
     fetchAnalytics();
   }, []);
 
   const fetchAnalytics = async () => {
     try {
-      const res = await axios.get("https://vartalap-backend-hz3z.onrender.com");
+      const res = await axios.get(`${API_URL}/api/analytics`);
       setAnalytics(res.data);
     } catch (error) {
       console.log("Analytics fetch failed", error);
@@ -42,7 +53,7 @@ function Dashboard() {
     try {
       const roomId = "vartalap-" + Date.now();
 
-      await axios.post("http://localhost:5000/api/meetings", {
+      await axios.post(`${API_URL}/api/meetings`, {
         roomId,
         createdBy: user.name || "Vartalap User",
         creatorEmail: user.email || "user@vartalap.com",
@@ -69,9 +80,10 @@ function Dashboard() {
 
     reader.onload = async () => {
       try {
-         const res = await axios.post("https://vartalap-backend-hz3z.onrender.com/api/upload", {
+        const res = await axios.post(`${API_URL}/api/upload`, {
           image: reader.result,
-          });
+        });
+
         const updatedUser = {
           ...user,
           image: res.data.url,
@@ -94,6 +106,59 @@ function Dashboard() {
     navigate("/login");
   };
 
+  const stats = [
+    { icon: "🎥", label: "Meetings", value: analytics.meetings, hint: "Created rooms" },
+    { icon: "💬", label: "Messages", value: analytics.messages, hint: "Chat activity" },
+    { icon: "🌐", label: "Translator", value: analytics.translations, hint: "Text translated" },
+    { icon: "📎", label: "Files", value: analytics.files, hint: "Shared files" },
+    { icon: "🎤", label: "Voice Notes", value: analytics.voiceNotes, hint: "Audio notes" },
+  ];
+
+  const actions = [
+    {
+      icon: "🎥",
+      title: "Create Meeting",
+      text: "Start a secure LiveKit video room.",
+      className: "meeting",
+      onClick: createMeeting,
+    },
+    {
+      icon: "📹",
+      title: "Join Meeting",
+      text: "Enter an existing meeting ID.",
+      className: "join",
+      onClick: joinMeeting,
+    },
+    {
+      icon: "📅",
+      title: "Schedule Meeting",
+      text: "Plan a meeting for later.",
+      className: "schedule",
+      onClick: () => navigate("/schedule"),
+    },
+    {
+      icon: "💬",
+      title: "Chat Room",
+      text: "Open real-time conversation.",
+      className: "chat",
+      onClick: () => navigate("/chat"),
+    },
+    {
+      icon: "🌐",
+      title: "Translator",
+      text: "Translate text quickly.",
+      className: "translate",
+      onClick: () => navigate("/translator"),
+    },
+    {
+      icon: "📁",
+      title: "Meeting History",
+      text: "View previous meeting records.",
+      className: "history",
+      onClick: () => navigate("/history"),
+    },
+  ];
+
   return (
     <div className={darkMode ? "dashboard-shell" : "dashboard-shell light-mode"}>
       <aside className="sidebar">
@@ -101,7 +166,7 @@ function Dashboard() {
           <div className="brand-icon">V</div>
           <div>
             <h2>Vartalap</h2>
-            <span>Connect Better</span>
+            <span>Workspace</span>
           </div>
         </div>
 
@@ -109,18 +174,28 @@ function Dashboard() {
           <button className="active">🏠 Dashboard</button>
           <button onClick={createMeeting}>🎥 Create Meeting</button>
           <button onClick={joinMeeting}>📹 Join Meeting</button>
-          <button onClick={() => navigate("/schedule")}>📅 Schedule Meeting</button>
+          <button onClick={() => navigate("/schedule")}>📅 Schedule</button>
           <button onClick={() => navigate("/chat")}>💬 Chat Room</button>
           <button onClick={() => navigate("/translator")}>🌐 Translator</button>
-          <button onClick={() => navigate("/history")}>📁 Meeting History</button>
-          <button>👤 Profile</button>
-
+          <button onClick={() => navigate("/history")}>📁 History</button>
           <button onClick={toggleTheme}>
             {darkMode ? "☀️ Light Mode" : "🌙 Dark Mode"}
           </button>
-
-          <button>⚙️ Settings</button>
         </nav>
+
+        <div className="sidebar-user">
+          <div className="mini-avatar">
+            {user.image ? (
+              <img src={user.image} alt="profile" />
+            ) : (
+              user.name?.charAt(0)?.toUpperCase() || "U"
+            )}
+          </div>
+          <div>
+            <strong>{user.name || "User"}</strong>
+            <small>Online</small>
+          </div>
+        </div>
 
         <button className="logout-side" onClick={logout}>
           🚪 Logout
@@ -128,16 +203,35 @@ function Dashboard() {
       </aside>
 
       <main className="dashboard-main">
-        <section className="top-card">
+        <section className="dashboard-topbar">
           <div>
-            <p className="small-title">Welcome back</p>
-            <h1>Hi, {user.name || "User"} 👋</h1>
-            <p className="subtitle">
-              Start meetings, chat instantly and translate conversations in real time.
-            </p>
+            <p>Overview</p>
+            <h1>Dashboard</h1>
           </div>
 
-          <div className="user-card">
+          <div className="topbar-meta">
+            <span>{today}</span>
+            <button onClick={toggleTheme}>
+              {darkMode ? "☀️" : "🌙"}
+            </button>
+          </div>
+        </section>
+
+        <section className="hero-card">
+          <div>
+            <p className="small-title">Welcome back</p>
+            <h2>Hi, {user.name || "User"} 👋</h2>
+            <p>
+              Manage meetings, chat, translations and collaboration tools from one clean workspace.
+            </p>
+
+            <div className="hero-actions">
+              <button onClick={createMeeting}>Start Meeting</button>
+              <button onClick={joinMeeting}>Join by ID</button>
+            </div>
+          </div>
+
+          <div className="profile-panel">
             <div className="avatar">
               {user.image ? (
                 <img src={user.image} alt="profile" className="profile-image" />
@@ -146,99 +240,52 @@ function Dashboard() {
               )}
             </div>
 
-            <div>
-              <h3>{user.name || "Vartalap User"}</h3>
-              <p>{user.email || "user@vartalap.com"}</p>
+            <h3>{user.name || "Vartalap User"}</h3>
+            <p>{user.email || "user@vartalap.com"}</p>
 
-              <label className="upload-label">
-                Upload Photo
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleProfileUpload}
-                />
-              </label>
-            </div>
+            <label className="upload-label">
+              Upload Photo
+              <input type="file" accept="image/*" onChange={handleProfileUpload} />
+            </label>
           </div>
         </section>
 
         <section className="stats-grid">
-          <div className="stat-card purple">
-            <span>🎥</span>
-            <h3>Meetings</h3>
-            <p>{analytics.meetings} Meetings</p>
-          </div>
+          {stats.map((item, index) => (
+            <div className="stat-card" key={item.label} style={{ animationDelay: `${index * 0.05}s` }}>
+              <span>{item.icon}</span>
+              <div>
+                <h3>{item.value}</h3>
+                <p>{item.label}</p>
+                <small>{item.hint}</small>
+              </div>
+            </div>
+          ))}
+        </section>
 
-          <div className="stat-card blue">
-            <span>💬</span>
-            <h3>Messages</h3>
-            <p>{analytics.messages} Messages</p>
-          </div>
-
-          <div className="stat-card green">
-            <span>🌐</span>
-            <h3>Translator</h3>
-            <p>{analytics.translations} Uses</p>
-          </div>
-
-          <div className="stat-card orange">
-            <span>📎</span>
-            <h3>Files</h3>
-            <p>{analytics.files} Shared</p>
-          </div>
-
-          <div className="stat-card purple">
-            <span>🎤</span>
-            <h3>Voice Notes</h3>
-            <p>{analytics.voiceNotes} Notes</p>
+        <section className="section-head">
+          <div>
+            <h2>Quick Actions</h2>
+            <p>Choose what you want to do next.</p>
           </div>
         </section>
 
         <section className="actions-grid">
-          <button className="action-card meeting" onClick={createMeeting}>
-            <span>🎥</span>
-            <h3>Create Meeting</h3>
-            <p>Start a new video room instantly.</p>
-          </button>
-
-          <button className="action-card join" onClick={joinMeeting}>
-            <span>📹</span>
-            <h3>Join Meeting</h3>
-            <p>Enter meeting ID and connect.</p>
-          </button>
-
-          <button className="action-card meeting" onClick={() => navigate("/schedule")}>
-            <span>📅</span>
-            <h3>Schedule Meeting</h3>
-            <p>Plan meetings for later.</p>
-          </button>
-
-          <button className="action-card chat" onClick={() => navigate("/chat")}>
-            <span>💬</span>
-            <h3>Chat Room</h3>
-            <p>Message users in real time.</p>
-          </button>
-
-          <button
-            className="action-card translate"
-            onClick={() => navigate("/translator")}
-          >
-            <span>🌐</span>
-            <h3>Translator</h3>
-            <p>Translate text quickly.</p>
-          </button>
-
-          <button className="action-card history" onClick={() => navigate("/history")}>
-            <span>📁</span>
-            <h3>Meeting History</h3>
-            <p>View your previous meetings.</p>
-          </button>
-
-          <button className="action-card settings" onClick={toggleTheme}>
-            <span>{darkMode ? "☀️" : "🌙"}</span>
-            <h3>{darkMode ? "Light Mode" : "Dark Mode"}</h3>
-            <p>Switch your dashboard theme.</p>
-          </button>
+          {actions.map((action, index) => (
+            <button
+              key={action.title}
+              className={`action-card ${action.className}`}
+              onClick={action.onClick}
+              style={{ animationDelay: `${index * 0.06}s` }}
+            >
+              <span>{action.icon}</span>
+              <div>
+                <h3>{action.title}</h3>
+                <p>{action.text}</p>
+              </div>
+              <b>→</b>
+            </button>
+          ))}
         </section>
       </main>
     </div>
