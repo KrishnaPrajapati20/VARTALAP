@@ -16,12 +16,14 @@ const meetingRoutes = require("./routes/meetingRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
 const scheduleRoutes = require("./routes/scheduleRoutes");
+const livekitRoutes = require("./routes/livekitRoutes");
 const app = express();
 
 app.use(cors());
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use("/api/schedule", scheduleRoutes);
+app.use("/api/livekit", livekitRoutes);
 const server = http.createServer(app);
 
 const io = new Server(server, {
