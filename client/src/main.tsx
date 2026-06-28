@@ -14,6 +14,8 @@ import ChatRoom from "./pages/ChatRoom";
 import Translator from "./pages/Translator";
 import History from "./pages/History";
 import ScheduleMeeting from "./pages/ScheduleMeeting";
+import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -50,12 +52,7 @@ createRoot(document.getElementById("root")!).render(
           }
         />
 
-       <Route 
-       path="/meeting/:roomId" element={
-       <MeetingRoom />
-       } 
-       />
-          
+        <Route path="/meeting/:roomId" element={<MeetingRoom />} />
 
         <Route
           path="/chat"
@@ -80,6 +77,24 @@ createRoot(document.getElementById("root")!).render(
           element={
             <ProtectedRoute>
               <History />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Settings />
             </ProtectedRoute>
           }
         />
