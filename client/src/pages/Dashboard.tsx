@@ -1,6 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import {
+  FiCalendar,
+  FiClock,
+  FiFileText,
+  FiLogOut,
+  FiMessageCircle,
+  FiMoon,
+  FiPlus,
+  FiSearch,
+  FiSettings,
+  FiSun,
+  FiUploadCloud,
+  FiUser,
+  FiVideo,
+  FiZap,
+} from "react-icons/fi";
 import "./Dashboard.css";
 
 const API_URL = "https://vartalap-backend-hz3z.onrender.com";
@@ -9,9 +25,7 @@ function Dashboard() {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 
-  const [darkMode, setDarkMode] = useState(
-    localStorage.getItem("theme") !== "light"
-  );
+  const [darkMode, setDarkMode] = useState(localStorage.getItem("theme") !== "light");
 
   const [analytics, setAnalytics] = useState({
     meetings: 0,
@@ -21,15 +35,14 @@ function Dashboard() {
     translations: 0,
   });
 
-  const today = useMemo(
-    () =>
-      new Date().toLocaleDateString("en-IN", {
-        weekday: "long",
-        day: "2-digit",
-        month: "short",
-      }),
-    []
-  );
+  const today = useMemo(() => {
+    return new Date().toLocaleDateString("en-IN", {
+      weekday: "long",
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  }, []);
 
   useEffect(() => {
     fetchAnalytics();
@@ -85,11 +98,7 @@ function Dashboard() {
           image: reader.result,
         });
 
-        const updatedUser = {
-          ...user,
-          image: res.data.url,
-        };
-
+        const updatedUser = { ...user, image: res.data.url };
         localStorage.setItem("user", JSON.stringify(updatedUser));
         window.location.reload();
       } catch (error) {
@@ -108,48 +117,50 @@ function Dashboard() {
   };
 
   const stats = [
-    { icon: "🎥", label: "Meetings", value: analytics.meetings },
-    { icon: "💬", label: "Messages", value: analytics.messages },
-    { icon: "🌐", label: "Translations", value: analytics.translations },
-    { icon: "📎", label: "Files", value: analytics.files },
-    { icon: "🎤", label: "Voice Notes", value: analytics.voiceNotes },
+    { label: "Meetings", value: analytics.meetings, icon: <FiVideo /> },
+    { label: "Messages", value: analytics.messages, icon: <FiMessageCircle /> },
+    { label: "Translations", value: analytics.translations, icon: <FiZap /> },
+    { label: "Files", value: analytics.files, icon: <FiFileText /> },
+    { label: "Voice Notes", value: analytics.voiceNotes, icon: <FiClock /> },
   ];
 
   const actions = [
-    { icon: "🎥", title: "Create Meeting", text: "Start a LiveKit video room", onClick: createMeeting },
-    { icon: "📹", title: "Join Meeting", text: "Join using meeting ID", onClick: joinMeeting },
-    { icon: "📅", title: "Schedule", text: "Plan meetings for later", onClick: () => navigate("/schedule") },
-    { icon: "💬", title: "Chat Room", text: "Open real-time chat", onClick: () => navigate("/chat") },
-    { icon: "🌐", title: "Translator", text: "Translate conversations", onClick: () => navigate("/translator") },
-    { icon: "📁", title: "History", text: "View meeting records", onClick: () => navigate("/history") },
+    { title: "Create Meeting", text: "Start a secure video room", icon: <FiVideo />, click: createMeeting },
+    { title: "Join Meeting", text: "Join using meeting ID", icon: <FiPlus />, click: joinMeeting },
+    { title: "Schedule", text: "Plan meetings for later", icon: <FiCalendar />, click: () => navigate("/schedule") },
+    { title: "Chat Room", text: "Open real-time chat", icon: <FiMessageCircle />, click: () => navigate("/chat") },
+    { title: "Translator", text: "Translate conversations", icon: <FiZap />, click: () => navigate("/translator") },
+    { title: "History", text: "View meeting records", icon: <FiFileText />, click: () => navigate("/history") },
   ];
 
   return (
-    <div className={darkMode ? "dashboard-page" : "dashboard-page light-mode"}>
-      <aside className="dash-sidebar">
-        <div className="dash-logo">
-          <div className="dash-logo-icon">V</div>
+    <div className={darkMode ? "vd-page" : "vd-page vd-light"}>
+      <div className="vd-bg-one"></div>
+      <div className="vd-bg-two"></div>
+
+      <aside className="vd-sidebar">
+        <div className="vd-brand">
+          <div className="vd-brand-icon">V</div>
           <div>
             <h2>Vartalap</h2>
-            <p>Connect Better</p>
+            <p>Team Workspace</p>
           </div>
         </div>
 
-        <nav className="dash-nav">
-          <button className="nav-active">🏠 Dashboard</button>
-          <button onClick={createMeeting}>🎥 Create Meeting</button>
-          <button onClick={joinMeeting}>📹 Join Meeting</button>
-          <button onClick={() => navigate("/schedule")}>📅 Schedule</button>
-          <button onClick={() => navigate("/chat")}>💬 Chat Room</button>
-          <button onClick={() => navigate("/translator")}>🌐 Translator</button>
-          <button onClick={() => navigate("/history")}>📁 History</button>
-          <button onClick={toggleTheme}>
-            {darkMode ? "☀️ Light Mode" : "🌙 Dark Mode"}
-          </button>
+        <nav className="vd-menu">
+          <button className="active"><FiUser /> Dashboard</button>
+          <button onClick={createMeeting}><FiVideo /> Create Meeting</button>
+          <button onClick={joinMeeting}><FiPlus /> Join Meeting</button>
+          <button onClick={() => navigate("/schedule")}><FiCalendar /> Schedule</button>
+          <button onClick={() => navigate("/chat")}><FiMessageCircle /> Chat Room</button>
+          <button onClick={() => navigate("/translator")}><FiZap /> Translator</button>
+          <button onClick={() => navigate("/history")}><FiFileText /> History</button>
+          <button onClick={toggleTheme}>{darkMode ? <FiSun /> : <FiMoon />} Theme</button>
+          <button><FiSettings /> Settings</button>
         </nav>
 
-        <div className="dash-mini-profile">
-          <div className="mini-profile-img">
+        <div className="vd-side-profile">
+          <div className="vd-side-avatar">
             {user.image ? <img src={user.image} alt="profile" /> : user.name?.charAt(0)?.toUpperCase() || "U"}
           </div>
           <div>
@@ -158,59 +169,61 @@ function Dashboard() {
           </div>
         </div>
 
-        <button className="dash-logout" onClick={logout}>Logout</button>
+        <button className="vd-logout" onClick={logout}>
+          <FiLogOut /> Logout
+        </button>
       </aside>
 
-      <main className="dash-main">
-        <header className="dash-header">
+      <main className="vd-main">
+        <header className="vd-header">
           <div>
             <p>{today}</p>
             <h1>Welcome back, {user.name || "User"}</h1>
           </div>
 
-          <div className="dash-header-actions">
-            <button onClick={toggleTheme}>{darkMode ? "☀️" : "🌙"}</button>
-            <button onClick={logout}>Logout</button>
+          <div className="vd-search">
+            <FiSearch />
+            <input placeholder="Search meetings, chats..." />
           </div>
+
+          <button className="vd-theme" onClick={toggleTheme}>
+            {darkMode ? <FiSun /> : <FiMoon />}
+          </button>
         </header>
 
-        <section className="dash-hero">
-          <div className="hero-content">
-            <span className="hero-tag">Live collaboration workspace</span>
-            <h2>Meet, chat and translate from one clean dashboard.</h2>
+        <section className="vd-hero">
+          <div className="vd-hero-text">
+            <span>Live collaboration platform</span>
+            <h2>Run meetings, chats and translations from one professional workspace.</h2>
             <p>
-              Start meetings, invite people, manage conversations and keep your work organized.
+              Vartalap helps you create secure meetings, collaborate with users and manage your workflow smoothly.
             </p>
 
-            <div className="hero-buttons">
-              <button onClick={createMeeting}>Start Meeting</button>
-              <button onClick={joinMeeting}>Join Meeting</button>
+            <div className="vd-hero-actions">
+              <button onClick={createMeeting}><FiVideo /> Start Meeting</button>
+              <button onClick={joinMeeting}><FiPlus /> Join by ID</button>
             </div>
           </div>
 
-          <div className="dash-profile-card">
-            <div className="profile-img-box">
-              {user.image ? (
-                <img src={user.image} alt="profile" />
-              ) : (
-                user.name?.charAt(0)?.toUpperCase() || "U"
-              )}
+          <div className="vd-profile-card">
+            <div className="vd-profile-img">
+              {user.image ? <img src={user.image} alt="profile" /> : user.name?.charAt(0)?.toUpperCase() || "U"}
             </div>
 
             <h3>{user.name || "Vartalap User"}</h3>
             <p>{user.email || "user@vartalap.com"}</p>
 
-            <label className="photo-upload-btn">
-              Change Photo
+            <label className="vd-upload">
+              <FiUploadCloud /> Upload Photo
               <input type="file" accept="image/*" onChange={handleProfileUpload} />
             </label>
           </div>
         </section>
 
-        <section className="dash-stats">
+        <section className="vd-stats">
           {stats.map((stat, index) => (
-            <div className="dash-stat-card" key={stat.label} style={{ animationDelay: `${index * 0.06}s` }}>
-              <div className="stat-icon">{stat.icon}</div>
+            <div className="vd-stat-card" key={stat.label} style={{ animationDelay: `${index * 0.06}s` }}>
+              <div className="vd-stat-icon">{stat.icon}</div>
               <div>
                 <h3>{stat.value}</h3>
                 <p>{stat.label}</p>
@@ -219,20 +232,20 @@ function Dashboard() {
           ))}
         </section>
 
-        <section className="dash-section-title">
+        <section className="vd-section-title">
           <h2>Quick Actions</h2>
-          <p>Fast access to your main Vartalap tools</p>
+          <p>Access your main tools quickly.</p>
         </section>
 
-        <section className="dash-actions">
+        <section className="vd-actions">
           {actions.map((action, index) => (
             <button
-              className="dash-action-card"
               key={action.title}
-              onClick={action.onClick}
-              style={{ animationDelay: `${index * 0.05}s` }}
+              className="vd-action-card"
+              onClick={action.click}
+              style={{ animationDelay: `${index * 0.06}s` }}
             >
-              <span>{action.icon}</span>
+              <div className="vd-action-icon">{action.icon}</div>
               <div>
                 <h3>{action.title}</h3>
                 <p>{action.text}</p>
