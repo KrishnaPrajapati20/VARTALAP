@@ -13,7 +13,6 @@ import {
   FiShield,
   FiStar,
   FiTrendingUp,
-  FiUploadCloud,
   FiVideo,
 } from "react-icons/fi";
 import "./Profile.css";
