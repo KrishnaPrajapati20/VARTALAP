@@ -50,14 +50,12 @@ createRoot(document.getElementById("root")!).render(
           }
         />
 
-        <Route
-          path="/meeting/:roomId"
-          element={
-            <ProtectedRoute>
-              <MeetingRoom />
-            </ProtectedRoute>
-          }
-        />
+       <Route 
+       path="/meeting/:roomId" element={
+       <MeetingRoom />
+       } 
+       />
+          
 
         <Route
           path="/chat"
