@@ -21,14 +21,15 @@ function Dashboard() {
     translations: 0,
   });
 
-  const today = useMemo(() => {
-    return new Date().toLocaleDateString("en-IN", {
-      weekday: "short",
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-  }, []);
+  const today = useMemo(
+    () =>
+      new Date().toLocaleDateString("en-IN", {
+        weekday: "long",
+        day: "2-digit",
+        month: "short",
+      }),
+    []
+  );
 
   useEffect(() => {
     fetchAnalytics();
@@ -107,71 +108,35 @@ function Dashboard() {
   };
 
   const stats = [
-    { icon: "🎥", label: "Meetings", value: analytics.meetings, hint: "Created rooms" },
-    { icon: "💬", label: "Messages", value: analytics.messages, hint: "Chat activity" },
-    { icon: "🌐", label: "Translator", value: analytics.translations, hint: "Text translated" },
-    { icon: "📎", label: "Files", value: analytics.files, hint: "Shared files" },
-    { icon: "🎤", label: "Voice Notes", value: analytics.voiceNotes, hint: "Audio notes" },
+    { icon: "🎥", label: "Meetings", value: analytics.meetings },
+    { icon: "💬", label: "Messages", value: analytics.messages },
+    { icon: "🌐", label: "Translations", value: analytics.translations },
+    { icon: "📎", label: "Files", value: analytics.files },
+    { icon: "🎤", label: "Voice Notes", value: analytics.voiceNotes },
   ];
 
   const actions = [
-    {
-      icon: "🎥",
-      title: "Create Meeting",
-      text: "Start a secure LiveKit video room.",
-      className: "meeting",
-      onClick: createMeeting,
-    },
-    {
-      icon: "📹",
-      title: "Join Meeting",
-      text: "Enter an existing meeting ID.",
-      className: "join",
-      onClick: joinMeeting,
-    },
-    {
-      icon: "📅",
-      title: "Schedule Meeting",
-      text: "Plan a meeting for later.",
-      className: "schedule",
-      onClick: () => navigate("/schedule"),
-    },
-    {
-      icon: "💬",
-      title: "Chat Room",
-      text: "Open real-time conversation.",
-      className: "chat",
-      onClick: () => navigate("/chat"),
-    },
-    {
-      icon: "🌐",
-      title: "Translator",
-      text: "Translate text quickly.",
-      className: "translate",
-      onClick: () => navigate("/translator"),
-    },
-    {
-      icon: "📁",
-      title: "Meeting History",
-      text: "View previous meeting records.",
-      className: "history",
-      onClick: () => navigate("/history"),
-    },
+    { icon: "🎥", title: "Create Meeting", text: "Start a LiveKit video room", onClick: createMeeting },
+    { icon: "📹", title: "Join Meeting", text: "Join using meeting ID", onClick: joinMeeting },
+    { icon: "📅", title: "Schedule", text: "Plan meetings for later", onClick: () => navigate("/schedule") },
+    { icon: "💬", title: "Chat Room", text: "Open real-time chat", onClick: () => navigate("/chat") },
+    { icon: "🌐", title: "Translator", text: "Translate conversations", onClick: () => navigate("/translator") },
+    { icon: "📁", title: "History", text: "View meeting records", onClick: () => navigate("/history") },
   ];
 
   return (
-    <div className={darkMode ? "dashboard-shell" : "dashboard-shell light-mode"}>
-      <aside className="sidebar">
-        <div className="brand">
-          <div className="brand-icon">V</div>
+    <div className={darkMode ? "dashboard-page" : "dashboard-page light-mode"}>
+      <aside className="dash-sidebar">
+        <div className="dash-logo">
+          <div className="dash-logo-icon">V</div>
           <div>
             <h2>Vartalap</h2>
-            <span>Workspace</span>
+            <p>Connect Better</p>
           </div>
         </div>
 
-        <nav className="menu">
-          <button className="active">🏠 Dashboard</button>
+        <nav className="dash-nav">
+          <button className="nav-active">🏠 Dashboard</button>
           <button onClick={createMeeting}>🎥 Create Meeting</button>
           <button onClick={joinMeeting}>📹 Join Meeting</button>
           <button onClick={() => navigate("/schedule")}>📅 Schedule</button>
@@ -183,58 +148,50 @@ function Dashboard() {
           </button>
         </nav>
 
-        <div className="sidebar-user">
-          <div className="mini-avatar">
-            {user.image ? (
-              <img src={user.image} alt="profile" />
-            ) : (
-              user.name?.charAt(0)?.toUpperCase() || "U"
-            )}
+        <div className="dash-mini-profile">
+          <div className="mini-profile-img">
+            {user.image ? <img src={user.image} alt="profile" /> : user.name?.charAt(0)?.toUpperCase() || "U"}
           </div>
           <div>
             <strong>{user.name || "User"}</strong>
-            <small>Online</small>
+            <span>Online</span>
           </div>
         </div>
 
-        <button className="logout-side" onClick={logout}>
-          🚪 Logout
-        </button>
+        <button className="dash-logout" onClick={logout}>Logout</button>
       </aside>
 
-      <main className="dashboard-main">
-        <section className="dashboard-topbar">
+      <main className="dash-main">
+        <header className="dash-header">
           <div>
-            <p>Overview</p>
-            <h1>Dashboard</h1>
+            <p>{today}</p>
+            <h1>Welcome back, {user.name || "User"}</h1>
           </div>
 
-          <div className="topbar-meta">
-            <span>{today}</span>
-            <button onClick={toggleTheme}>
-              {darkMode ? "☀️" : "🌙"}
-            </button>
+          <div className="dash-header-actions">
+            <button onClick={toggleTheme}>{darkMode ? "☀️" : "🌙"}</button>
+            <button onClick={logout}>Logout</button>
           </div>
-        </section>
+        </header>
 
-        <section className="hero-card">
-          <div>
-            <p className="small-title">Welcome back</p>
-            <h2>Hi, {user.name || "User"} 👋</h2>
+        <section className="dash-hero">
+          <div className="hero-content">
+            <span className="hero-tag">Live collaboration workspace</span>
+            <h2>Meet, chat and translate from one clean dashboard.</h2>
             <p>
-              Manage meetings, chat, translations and collaboration tools from one clean workspace.
+              Start meetings, invite people, manage conversations and keep your work organized.
             </p>
 
-            <div className="hero-actions">
+            <div className="hero-buttons">
               <button onClick={createMeeting}>Start Meeting</button>
-              <button onClick={joinMeeting}>Join by ID</button>
+              <button onClick={joinMeeting}>Join Meeting</button>
             </div>
           </div>
 
-          <div className="profile-panel">
-            <div className="avatar">
+          <div className="dash-profile-card">
+            <div className="profile-img-box">
               {user.image ? (
-                <img src={user.image} alt="profile" className="profile-image" />
+                <img src={user.image} alt="profile" />
               ) : (
                 user.name?.charAt(0)?.toUpperCase() || "U"
               )}
@@ -243,40 +200,37 @@ function Dashboard() {
             <h3>{user.name || "Vartalap User"}</h3>
             <p>{user.email || "user@vartalap.com"}</p>
 
-            <label className="upload-label">
-              Upload Photo
+            <label className="photo-upload-btn">
+              Change Photo
               <input type="file" accept="image/*" onChange={handleProfileUpload} />
             </label>
           </div>
         </section>
 
-        <section className="stats-grid">
-          {stats.map((item, index) => (
-            <div className="stat-card" key={item.label} style={{ animationDelay: `${index * 0.05}s` }}>
-              <span>{item.icon}</span>
+        <section className="dash-stats">
+          {stats.map((stat, index) => (
+            <div className="dash-stat-card" key={stat.label} style={{ animationDelay: `${index * 0.06}s` }}>
+              <div className="stat-icon">{stat.icon}</div>
               <div>
-                <h3>{item.value}</h3>
-                <p>{item.label}</p>
-                <small>{item.hint}</small>
+                <h3>{stat.value}</h3>
+                <p>{stat.label}</p>
               </div>
             </div>
           ))}
         </section>
 
-        <section className="section-head">
-          <div>
-            <h2>Quick Actions</h2>
-            <p>Choose what you want to do next.</p>
-          </div>
+        <section className="dash-section-title">
+          <h2>Quick Actions</h2>
+          <p>Fast access to your main Vartalap tools</p>
         </section>
 
-        <section className="actions-grid">
+        <section className="dash-actions">
           {actions.map((action, index) => (
             <button
+              className="dash-action-card"
               key={action.title}
-              className={`action-card ${action.className}`}
               onClick={action.onClick}
-              style={{ animationDelay: `${index * 0.06}s` }}
+              style={{ animationDelay: `${index * 0.05}s` }}
             >
               <span>{action.icon}</span>
               <div>
