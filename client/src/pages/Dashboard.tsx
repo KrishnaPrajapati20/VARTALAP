@@ -25,7 +25,7 @@ function Dashboard() {
 
   const fetchAnalytics = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/analytics");
+      const res = await axios.get("https://vartalap-backend-hz3z.onrender.com");
       setAnalytics(res.data);
     } catch (error) {
       console.log("Analytics fetch failed", error);

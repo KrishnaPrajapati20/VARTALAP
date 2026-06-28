@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import EmojiPicker from "emoji-picker-react";
 
-const socket = io("http://localhost:5000");
+const socket = io("https://vartalap-backend-hz3z.onrender.com");
 
 function ChatRoom() {
   const [message, setMessage] = useState("");

@@ -13,7 +13,7 @@ function Login() {
     e.preventDefault();
 
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", {
+      const res = await axios.post("https://vartalap-backend-hz3z.onrender.com", {
         email,
         password,
       });
