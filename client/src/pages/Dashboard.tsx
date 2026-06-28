@@ -147,6 +147,7 @@ function Dashboard() {
         </div>
 
         <nav className="vd-menu">
+          <button onClick={() => navigate("/profile")}>👤 Profile</button>
           <button className="active"><FiUser /> Dashboard</button>
           <button onClick={createMeeting}><FiVideo /> Create Meeting</button>
           <button onClick={joinMeeting}><FiPlus /> Join Meeting</button>
@@ -155,7 +156,6 @@ function Dashboard() {
           <button onClick={() => navigate("/translator")}><FiZap /> Translator</button>
           <button onClick={() => navigate("/history")}><FiFileText /> History</button>
           <button onClick={toggleTheme}>{darkMode ? <FiSun /> : <FiMoon />} Theme</button>
-          <button onClick={() => navigate("/profile")}>👤 Profile</button>
           <button onClick={() => navigate("/settings")}>⚙️ Settings</button>
         </nav>
 
