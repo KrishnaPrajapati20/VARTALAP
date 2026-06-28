@@ -1,10 +1,27 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
+import {
+  FiArrowLeft,
+  FiCalendar,
+  FiClock,
+  FiCopy,
+  FiRefreshCw,
+  FiSearch,
+  FiTrash2,
+  FiVideo,
+} from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
+import "./History.css";
+
+const API_URL = "https://vartalap-backend-hz3z.onrender.com";
 
 function History() {
+  const navigate = useNavigate();
+
   const [meetings, setMeetings] = useState<any[]>([]);
   const [scheduledMeetings, setScheduledMeetings] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState("history");
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     fetchMeetings();
@@ -12,131 +29,223 @@ function History() {
   }, []);
 
   const fetchMeetings = async () => {
-    const res = await axios.get("http://localhost:5000/api/meetings");
-    setMeetings(res.data.meetings);
+    try {
+      const res = await axios.get(`${API_URL}/api/meetings`);
+      setMeetings(res.data.meetings || []);
+    } catch (error) {
+      console.log("Meeting history fetch failed", error);
+    }
   };
 
   const fetchScheduledMeetings = async () => {
-    const res = await axios.get("http://localhost:5000/api/schedule");
-    setScheduledMeetings(res.data.meetings);
+    try {
+      const res = await axios.get(`${API_URL}/api/schedule`);
+      setScheduledMeetings(res.data.meetings || []);
+    } catch (error) {
+      console.log("Schedule fetch failed", error);
+    }
   };
 
   const deleteSchedule = async (id: string) => {
-    await axios.delete(`http://localhost:5000/api/schedule/${id}`);
-    fetchScheduledMeetings();
+    if (!confirm("Delete this scheduled meeting?")) return;
+
+    try {
+      await axios.delete(`${API_URL}/api/schedule/${id}`);
+      fetchScheduledMeetings();
+    } catch (error) {
+      alert("Schedule delete nahi ho paya");
+    }
   };
 
+  const copyText = async (value: string) => {
+    await navigator.clipboard.writeText(value);
+    alert("Copied!");
+  };
+
+  const filteredHistory = useMemo(() => {
+    return meetings.filter((m) =>
+      `${m.roomId} ${m.createdBy} ${m.creatorEmail}`
+        .toLowerCase()
+        .includes(search.toLowerCase())
+    );
+  }, [meetings, search]);
+
+  const filteredScheduled = useMemo(() => {
+    return scheduledMeetings.filter((m) =>
+      `${m.title} ${m.date} ${m.time} ${m.createdBy} ${m.creatorEmail}`
+        .toLowerCase()
+        .includes(search.toLowerCase())
+    );
+  }, [scheduledMeetings, search]);
+
   return (
-    <div
-      style={{
-        padding: "40px",
-        color: "white",
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #020617, #111827, #1e1b4b)",
-        fontFamily: "Poppins, Arial, sans-serif",
-      }}
-    >
-      <h1>📁 Meeting Center</h1>
+    <div className="history-page">
+      <div className="history-glow one"></div>
+      <div className="history-glow two"></div>
 
-      <div style={{ display: "flex", gap: "12px", margin: "25px 0" }}>
-        <button
-          onClick={() => setActiveTab("history")}
-          style={{
-            padding: "12px 18px",
-            borderRadius: "12px",
-            border: "none",
-            cursor: "pointer",
-            background: activeTab === "history" ? "#22c55e" : "#334155",
-            color: "white",
-          }}
-        >
-          📁 Previous Meetings
+      <header className="history-header">
+        <button onClick={() => navigate("/dashboard")} className="history-back">
+          <FiArrowLeft /> Dashboard
         </button>
 
+        <div>
+          <p>Meeting Workspace</p>
+          <h1>Meeting Center</h1>
+        </div>
+
         <button
-          onClick={() => setActiveTab("scheduled")}
-          style={{
-            padding: "12px 18px",
-            borderRadius: "12px",
-            border: "none",
-            cursor: "pointer",
-            background: activeTab === "scheduled" ? "#22c55e" : "#334155",
-            color: "white",
+          className="history-refresh"
+          onClick={() => {
+            fetchMeetings();
+            fetchScheduledMeetings();
           }}
         >
-          📅 Scheduled Meetings
+          <FiRefreshCw /> Refresh
         </button>
-      </div>
+      </header>
+
+      <section className="history-hero">
+        <div>
+          <span>Professional Meeting Records</span>
+          <h2>Manage your previous and scheduled meetings in one place.</h2>
+          <p>
+            Track meeting activity, copy room IDs, rejoin rooms and manage scheduled sessions.
+          </p>
+        </div>
+      </section>
+
+      <section className="history-stats">
+        <div>
+          <FiVideo />
+          <h3>{meetings.length}</h3>
+          <p>Total Meetings</p>
+        </div>
+
+        <div>
+          <FiCalendar />
+          <h3>{scheduledMeetings.length}</h3>
+          <p>Scheduled</p>
+        </div>
+
+        <div>
+          <FiClock />
+          <h3>{filteredHistory.length}</h3>
+          <p>Visible History</p>
+        </div>
+
+        <div>
+          <FiSearch />
+          <h3>{filteredScheduled.length}</h3>
+          <p>Visible Schedules</p>
+        </div>
+      </section>
+
+      <section className="history-tools">
+        <div className="history-search">
+          <FiSearch />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search meeting ID, title, host or email..."
+          />
+        </div>
+
+        <div className="history-tabs">
+          <button
+            className={activeTab === "history" ? "active" : ""}
+            onClick={() => setActiveTab("history")}
+          >
+            Previous Meetings
+          </button>
+
+          <button
+            className={activeTab === "scheduled" ? "active" : ""}
+            onClick={() => setActiveTab("scheduled")}
+          >
+            Scheduled Meetings
+          </button>
+        </div>
+      </section>
 
       {activeTab === "history" && (
-        <>
-          {meetings.length === 0 ? (
-            <p>No previous meetings found.</p>
+        <section className="history-grid">
+          {filteredHistory.length === 0 ? (
+            <div className="empty-box">No previous meetings found.</div>
           ) : (
-            meetings.map((meeting: any) => (
-              <div
-                key={meeting._id}
-                style={{
-                  padding: "20px",
-                  marginTop: "20px",
-                  borderRadius: "18px",
-                  background: "rgba(255,255,255,0.08)",
-                  border: "1px solid rgba(255,255,255,0.12)",
-                }}
-              >
-                <h3>🎥 Meeting ID: {meeting.roomId}</h3>
-                <p>Created By: {meeting.createdBy}</p>
-                <p>Email: {meeting.creatorEmail}</p>
-                <p>Date: {new Date(meeting.createdAt).toLocaleString()}</p>
+            filteredHistory.map((meeting) => (
+              <div className="meeting-card" key={meeting._id}>
+                <div className="card-top">
+                  <div className="card-icon">
+                    <FiVideo />
+                  </div>
+                  <span className="status completed">Completed</span>
+                </div>
+
+                <h3>{meeting.roomId}</h3>
+
+                <div className="info-list">
+                  <p><b>Created By:</b> {meeting.createdBy || "Unknown"}</p>
+                  <p><b>Email:</b> {meeting.creatorEmail || "No email"}</p>
+                  <p>
+                    <b>Date:</b>{" "}
+                    {meeting.createdAt
+                      ? new Date(meeting.createdAt).toLocaleString()
+                      : "Not available"}
+                  </p>
+                </div>
+
+                <div className="card-actions">
+                  <button onClick={() => navigate(`/meeting/${meeting.roomId}`)}>
+                    Join Again
+                  </button>
+                  <button onClick={() => copyText(meeting.roomId)}>
+                    <FiCopy /> Copy ID
+                  </button>
+                </div>
               </div>
             ))
           )}
-        </>
+        </section>
       )}
 
       {activeTab === "scheduled" && (
-        <>
-          {scheduledMeetings.length === 0 ? (
-            <p>No scheduled meetings found.</p>
+        <section className="history-grid">
+          {filteredScheduled.length === 0 ? (
+            <div className="empty-box">No scheduled meetings found.</div>
           ) : (
-            scheduledMeetings.map((meeting: any) => (
-              <div
-                key={meeting._id}
-                style={{
-                  padding: "20px",
-                  marginTop: "20px",
-                  borderRadius: "18px",
-                  background: "rgba(255,255,255,0.08)",
-                  border: "1px solid rgba(255,255,255,0.12)",
-                }}
-              >
-                <h3>📅 {meeting.title}</h3>
-                <p>Date: {meeting.date}</p>
-                <p>Time: {meeting.time}</p>
-                <p>Description: {meeting.description || "No description"}</p>
-                <p>Created By: {meeting.createdBy}</p>
-                <p>Email: {meeting.creatorEmail}</p>
-                <p>Status: {meeting.status}</p>
+            filteredScheduled.map((meeting) => (
+              <div className="meeting-card" key={meeting._id}>
+                <div className="card-top">
+                  <div className="card-icon schedule">
+                    <FiCalendar />
+                  </div>
+                  <span className="status scheduled">
+                    {meeting.status || "Scheduled"}
+                  </span>
+                </div>
 
-                <button
-                  onClick={() => deleteSchedule(meeting._id)}
-                  style={{
-                    marginTop: "10px",
-                    padding: "10px 14px",
-                    borderRadius: "10px",
-                    border: "none",
-                    cursor: "pointer",
-                    background: "#ef4444",
-                    color: "white",
-                    fontWeight: "bold",
-                  }}
-                >
-                  Delete Schedule
-                </button>
+                <h3>{meeting.title}</h3>
+
+                <div className="info-list">
+                  <p><b>Date:</b> {meeting.date}</p>
+                  <p><b>Time:</b> {meeting.time}</p>
+                  <p><b>Description:</b> {meeting.description || "No description"}</p>
+                  <p><b>Created By:</b> {meeting.createdBy}</p>
+                  <p><b>Email:</b> {meeting.creatorEmail}</p>
+                </div>
+
+                <div className="card-actions">
+                  <button onClick={() => navigate(`/meeting/${meeting.roomId || "vartalap-" + meeting._id}`)}>
+                    Join
+                  </button>
+                  <button className="danger" onClick={() => deleteSchedule(meeting._id)}>
+                    <FiTrash2 /> Delete
+                  </button>
+                </div>
               </div>
             ))
           )}
-        </>
+        </section>
       )}
     </div>
   );
