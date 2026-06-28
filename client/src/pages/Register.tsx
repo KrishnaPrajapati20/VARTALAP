@@ -1,7 +1,19 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
+import {
+  FiArrowRight,
+  FiLock,
+  FiMail,
+  FiMessageCircle,
+  FiShield,
+  FiUserPlus,
+  FiVideo,
+  FiZap,
+} from "react-icons/fi";
 import "./Register.css";
+
+const API_URL = "https://vartalap-backend-hz3z.onrender.com";
 
 function Register() {
   const navigate = useNavigate();
@@ -14,19 +26,15 @@ function Register() {
     e.preventDefault();
 
     try {
-      const res = await axios.post(
-        "https://vartalap-backend-hz3z.onrender.com/api/auth/register",
-        {
-          name,
-          email,
-          password,
-        }
-      );
+      const res = await axios.post(`${API_URL}/api/auth/register`, {
+        name,
+        email,
+        password,
+      });
 
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
 
-      alert("Registration Successful!");
       navigate("/dashboard");
     } catch (error: any) {
       alert(error?.response?.data?.message || "Registration Failed");
@@ -34,90 +42,96 @@ function Register() {
   };
 
   return (
-    <div className="register-page">
-      <div className="bird bird-one">🕊️</div>
-      <div className="bird bird-two">🕊️</div>
-      <div className="bird bird-three">🕊️</div>
+    <div className="auth-page">
+      <div className="auth-glow auth-glow-one"></div>
+      <div className="auth-glow auth-glow-two"></div>
 
-      <div className="petal petal-one">✦</div>
-      <div className="petal petal-two">✦</div>
-      <div className="petal petal-three">✦</div>
-
-      <section className="register-left">
-        <div className="brand-box">
-          <div className="brand-bubble">💬</div>
-          <h1>VARTALAP</h1>
-          <p>Connect. Chat. Collaborate.</p>
-          <span></span>
+      <section className="auth-left">
+        <div className="auth-brand">
+          <div className="auth-brand-icon">V</div>
+          <div>
+            <h2>Vartalap</h2>
+            <p>Connect Better</p>
+          </div>
         </div>
 
-        <div className="welcome-card">
-          <div className="heart">💜</div>
-          <h2>
-            Welcome to <b>Vartalap</b>
-          </h2>
+        <div className="auth-hero">
+          <span>Start your collaboration journey</span>
+          <h1>Create your Vartalap workspace account.</h1>
           <p>
-            A peaceful space to connect, share ideas, and build meaningful
-            conversations.
+            Join meetings, chat in real time, translate conversations and manage
+            your communication from one professional dashboard.
           </p>
-          <div className="mini-users">👨‍💻 👩‍💻 👩‍🎓</div>
-          <small>Let's start your journey together ✨</small>
+        </div>
+
+        <div className="auth-feature-grid">
+          <div><FiVideo /><strong>Video Meetings</strong><small>LiveKit powered</small></div>
+          <div><FiMessageCircle /><strong>Team Chat</strong><small>Real-time messaging</small></div>
+          <div><FiShield /><strong>Secure Access</strong><small>JWT authentication</small></div>
+          <div><FiZap /><strong>Fast Tools</strong><small>Clean workflow</small></div>
         </div>
       </section>
 
-      <section className="register-right">
-        <form className="register-card" onSubmit={handleRegister}>
-          <div className="register-icon">👤＋</div>
+      <section className="auth-right">
+        <form className="auth-card" onSubmit={handleRegister}>
+          <div className="auth-card-icon">
+            <FiUserPlus />
+          </div>
 
-          <h2>
-            Create <span>Your</span> Account
-          </h2>
-          <p className="register-subtitle">
-            Join <b>Vartalap</b> and start connecting.
+          <p className="auth-label">Create Account</p>
+          <h2>Join Vartalap</h2>
+          <p className="auth-subtitle">
+            Fill in your details to create a secure account.
           </p>
 
-          <div className="input-group">
-            <span>👤</span>
-            <input
-              type="text"
-              placeholder="Full Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
+          <div className="auth-input-group">
+            <label>Full Name</label>
+            <div className="auth-input">
+              <FiUserPlus />
+              <input
+                type="text"
+                placeholder="Enter your full name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </div>
           </div>
 
-          <div className="input-group">
-            <span>✉️</span>
-            <input
-              type="email"
-              placeholder="Email Address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+          <div className="auth-input-group">
+            <label>Email Address</label>
+            <div className="auth-input">
+              <FiMail />
+              <input
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
           </div>
 
-          <div className="input-group">
-            <span>🔒</span>
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+          <div className="auth-input-group">
+            <label>Password</label>
+            <div className="auth-input">
+              <FiLock />
+              <input
+                type="password"
+                placeholder="Create a password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
           </div>
 
-          <button className="register-btn" type="submit">
-            Register Now →
+          <button className="auth-submit" type="submit">
+            Create Account <FiArrowRight />
           </button>
 
-          <p className="login-link">
-            Already have an account?{" "}
-            <button type="button" onClick={() => navigate("/login")}>
-              Login
-            </button>
+          <p className="auth-switch">
+            Already have an account? <Link to="/login">Login</Link>
           </p>
         </form>
       </section>
