@@ -1,7 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import "./Register.css";
 
 function Register() {
+  const navigate = useNavigate();
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -11,7 +15,7 @@ function Register() {
 
     try {
       const res = await axios.post(
-        "https://vartalap-backend-hz3z.onrender.coom",
+        "https://vartalap-backend-hz3z.onrender.com/api/auth/register",
         {
           name,
           email,
@@ -19,49 +23,104 @@ function Register() {
         }
       );
 
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+
       alert("Registration Successful!");
-      console.log(res.data);
+      navigate("/dashboard");
     } catch (error: any) {
-      alert(
-        error?.response?.data?.message || "Registration Failed"
-      );
+      alert(error?.response?.data?.message || "Registration Failed");
     }
   };
 
   return (
-    <div>
-      <h1>Register</h1>
+    <div className="register-page">
+      <div className="bird bird-one">🕊️</div>
+      <div className="bird bird-two">🕊️</div>
+      <div className="bird bird-three">🕊️</div>
 
-      <form onSubmit={handleRegister}>
-        <input
-          type="text"
-          placeholder="Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <br />
-        <br />
+      <div className="petal petal-one">✦</div>
+      <div className="petal petal-two">✦</div>
+      <div className="petal petal-three">✦</div>
 
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <br />
-        <br />
+      <section className="register-left">
+        <div className="brand-box">
+          <div className="brand-bubble">💬</div>
+          <h1>VARTALAP</h1>
+          <p>Connect. Chat. Collaborate.</p>
+          <span></span>
+        </div>
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <br />
-        <br />
+        <div className="welcome-card">
+          <div className="heart">💜</div>
+          <h2>
+            Welcome to <b>Vartalap</b>
+          </h2>
+          <p>
+            A peaceful space to connect, share ideas, and build meaningful
+            conversations.
+          </p>
+          <div className="mini-users">👨‍💻 👩‍💻 👩‍🎓</div>
+          <small>Let's start your journey together ✨</small>
+        </div>
+      </section>
 
-        <button type="submit">Register</button>
-      </form>
+      <section className="register-right">
+        <form className="register-card" onSubmit={handleRegister}>
+          <div className="register-icon">👤＋</div>
+
+          <h2>
+            Create <span>Your</span> Account
+          </h2>
+          <p className="register-subtitle">
+            Join <b>Vartalap</b> and start connecting.
+          </p>
+
+          <div className="input-group">
+            <span>👤</span>
+            <input
+              type="text"
+              placeholder="Full Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="input-group">
+            <span>✉️</span>
+            <input
+              type="email"
+              placeholder="Email Address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="input-group">
+            <span>🔒</span>
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <button className="register-btn" type="submit">
+            Register Now →
+          </button>
+
+          <p className="login-link">
+            Already have an account?{" "}
+            <button type="button" onClick={() => navigate("/login")}>
+              Login
+            </button>
+          </p>
+        </form>
+      </section>
     </div>
   );
 }
