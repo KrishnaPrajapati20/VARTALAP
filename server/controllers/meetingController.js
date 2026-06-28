@@ -1,4 +1,4 @@
-const Meeting = require("../models/meeting");
+const meeting = require("../models/meeting");
 
 const createMeeting = async (req, res) => {
   try {
