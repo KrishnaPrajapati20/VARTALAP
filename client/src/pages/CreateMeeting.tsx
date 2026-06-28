@@ -1,143 +1,55 @@
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
+function CreateMeeting() {
+  const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
 
-function CreateMeeting(){
+  const createMeeting = async () => {
+    try {
+      const roomId = "vartalap-" + Date.now();
 
-const navigate=useNavigate();
+      await axios.post("https://vartalap-backend-hz3z.onrender.com/api/meetings", {
+        roomId,
+        createdBy: user.name || "Vartalap User",
+        creatorEmail: user.email || "user@vartalap.com",
+      });
 
+      navigate(`/meeting/${roomId}`);
+    } catch (error) {
+      alert("Meeting create nahi ho payi");
+      console.log(error);
+    }
+  };
 
-const user=JSON.parse(
-
-localStorage.getItem("user")
-
-|| "{}"
-
-);
-
-
-
-const createMeeting=async()=>{
-
-
-const roomId=
-
-"vartalap-"
-
-+
-
-Date.now();
-
-
-
-await axios.post(
-
-https://vartalap-backend-hz3z.onrender.com
-
-{
-
-roomId,
-
-createdBy:user.name,
-
-creatorEmail:user.email
-
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "#0f172a",
+        color: "white",
+        display: "grid",
+        placeItems: "center",
+        fontFamily: "Poppins, Arial, sans-serif",
+      }}
+    >
+      <button
+        onClick={createMeeting}
+        style={{
+          padding: "15px 25px",
+          borderRadius: "12px",
+          border: "none",
+          cursor: "pointer",
+          background: "#22c55e",
+          color: "white",
+          fontWeight: "bold",
+          fontSize: "18px",
+        }}
+      >
+        🎥 Create Meeting
+      </button>
+    </div>
+  );
 }
-
-);
-
-
-
-navigate(
-
-`/meeting/${roomId}`
-
-);
-
-
-};
-
-
-
-return(
-
-
-<div
-
-style={{
-
-minHeight:"100vh",
-
-display:"grid",
-
-placeItems:"center",
-
-background:"#020617"
-
-}}
-
->
-
-
-<div
-
-style={{
-
-padding:"40px",
-
-borderRadius:"20px",
-
-background:"#1e293b"
-
-}}
-
->
-
-
-<h1>
-
-🎥 Create Meeting
-
-</h1>
-
-
-
-<button
-
-onClick={createMeeting}
-
-
-style={{
-
-padding:"15px",
-
-border:"none",
-
-borderRadius:"10px",
-
-cursor:"pointer"
-
-}}
-
->
-
-
-Start Meeting
-
-
-</button>
-
-
-</div>
-
-
-</div>
-
-
-);
-
-
-}
-
 
 export default CreateMeeting;
