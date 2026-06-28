@@ -1,7 +1,18 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
+import {
+  FiArrowRight,
+  FiLock,
+  FiMail,
+  FiMessageCircle,
+  FiShield,
+  FiVideo,
+  FiZap,
+} from "react-icons/fi";
 import "./Login.css";
+
+const API_URL = "https://vartalap-backend-hz3z.onrender.com";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -13,13 +24,10 @@ function Login() {
     e.preventDefault();
 
     try {
-      const res = await axios.post(
-  "https://vartalap-backend-hz3z.onrender.com/api/auth/login",
-  {
-    email,
-    password,
-  }
-);
+      const res = await axios.post(`${API_URL}/api/auth/login`, {
+        email,
+        password,
+      });
 
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
@@ -31,49 +39,104 @@ function Login() {
   };
 
   return (
-    <div className="login-page">
-      <div className="circle circle-one"></div>
-      <div className="circle circle-two"></div>
-      <div className="circle circle-three"></div>
+    <div className="auth-page">
+      <div className="auth-glow auth-glow-one"></div>
+      <div className="auth-glow auth-glow-two"></div>
 
-      <div className="login-card">
-        <div className="logo-box">V</div>
+      <section className="auth-left">
+        <div className="auth-brand">
+          <div className="auth-brand-icon">V</div>
+          <div>
+            <h2>Vartalap</h2>
+            <p>Connect Better</p>
+          </div>
+        </div>
 
-        <h1>Welcome Back</h1>
-        <p className="tagline">Login to continue your Vartalap journey</p>
+        <div className="auth-hero">
+          <span>Professional collaboration platform</span>
+          <h1>Welcome back to your communication workspace.</h1>
+          <p>
+            Continue your meetings, real-time chats, translations and team
+            collaboration from one secure dashboard.
+          </p>
+        </div>
 
-        <form onSubmit={handleLogin}>
-          <div className="input-group">
+        <div className="auth-feature-grid">
+          <div>
+            <FiVideo />
+            <strong>Live Meetings</strong>
+            <small>Powered by LiveKit</small>
+          </div>
+
+          <div>
+            <FiMessageCircle />
+            <strong>Real-time Chat</strong>
+            <small>Instant conversations</small>
+          </div>
+
+          <div>
+            <FiShield />
+            <strong>Secure Login</strong>
+            <small>JWT authentication</small>
+          </div>
+
+          <div>
+            <FiZap />
+            <strong>Fast Workflow</strong>
+            <small>Simple and smooth</small>
+          </div>
+        </div>
+      </section>
+
+      <section className="auth-right">
+        <form className="auth-card" onSubmit={handleLogin}>
+          <div className="auth-card-icon">
+            <FiLock />
+          </div>
+
+          <p className="auth-label">Account Login</p>
+          <h2>Sign in to Vartalap</h2>
+          <p className="auth-subtitle">
+            Enter your credentials to access your dashboard.
+          </p>
+
+          <div className="auth-input-group">
             <label>Email Address</label>
-            <input
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+            <div className="auth-input">
+              <FiMail />
+              <input
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
           </div>
 
-          <div className="input-group">
+          <div className="auth-input-group">
             <label>Password</label>
-            <input
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <div className="auth-input">
+              <FiLock />
+              <input
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
           </div>
 
-          <button className="login-btn" type="submit">
-            Login
+          <button className="auth-submit" type="submit">
+            Login <FiArrowRight />
           </button>
-        </form>
 
-        <p className="switch-text">
-          New to Vartalap? <Link to="/register">Create account</Link>
-        </p>
-      </div>
+          <p className="auth-switch">
+            New to Vartalap? <Link to="/register">Create account</Link>
+          </p>
+        </form>
+      </section>
     </div>
   );
 }
