@@ -69,10 +69,9 @@ function Dashboard() {
 
     reader.onload = async () => {
       try {
-        const res = await axios.post("http://localhost:5000/api/upload", {
+         const res = await axios.post("https://vartalap-backend-hz3z.onrender.com/api/upload", {
           image: reader.result,
-        });
-
+          });
         const updatedUser = {
           ...user,
           image: res.data.url,
