@@ -7,7 +7,7 @@ import {
   VideoConference,
 } from "@livekit/components-react";
 
-import "@livekit/components-styles";
+import "@livekit/components-styles/dist/index.css";
 
 function MeetingRoom() {
   const { roomId } = useParams();
