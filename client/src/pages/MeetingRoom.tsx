@@ -1,47 +1,69 @@
 import { useEffect, useState } from "react";
-import { JitsiMeeting } from "@jitsi/react-sdk";
 import { useParams, useNavigate } from "react-router-dom";
-import { io } from "socket.io-client";
+import axios from "axios";
 
-const socket = io("http://localhost:5000");
+import {
+  LiveKitRoom,
+  VideoConference,
+} from "@livekit/components-react";
+
+import "@livekit/components-styles";
 
 function MeetingRoom() {
   const { roomId } = useParams();
   const navigate = useNavigate();
 
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const savedUser = JSON.parse(localStorage.getItem("user") || "{}");
+
+  const [token, setToken] = useState("");
+  const [serverUrl, setServerUrl] = useState("");
+  const [participantName, setParticipantName] = useState(
+    savedUser.name || ""
+  );
+
+  const [joined, setJoined] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [summary, setSummary] = useState("");
   const [notes, setNotes] = useState("");
-  const [participants, setParticipants] = useState<any[]>([]);
-  const [notifications, setNotifications] = useState<string[]>([
-    "Meeting room opened successfully",
-  ]);
+
+  const meetingId = roomId || "vartalap-room";
 
   useEffect(() => {
-    socket.emit("join_meeting_room", {
-      roomId,
-      user,
-    });
+    if (savedUser.name) {
+      joinMeeting(savedUser.name);
+    }
+  }, []);
 
-    socket.on("meeting_participants", (data) => {
-      setParticipants(data);
-    });
+  const joinMeeting = async (name?: string) => {
+    const finalName = name || participantName;
 
-    socket.on("meeting_notification", (data) => {
-      setNotifications((prev) => [data.message, ...prev]);
-    });
+    if (!finalName.trim()) {
+      alert("Please enter your name");
+      return;
+    }
 
-    return () => {
-      socket.emit("leave_meeting_room", {
-        roomId,
-        user,
-      });
+    try {
+      setLoading(true);
 
-      socket.off("meeting_participants");
-      socket.off("meeting_notification");
-    };
-  }, [roomId]);
+      const res = await axios.post(
+        "https://vartalap-backend-hz3z.onrender.com/api/livekit/token",
+        {
+          roomName: meetingId,
+          participantName: finalName,
+        }
+      );
+
+      setToken(res.data.token);
+      setServerUrl(res.data.url);
+      setJoined(true);
+    } catch (error) {
+      alert("Meeting join nahi ho payi");
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const generateSummary = () => {
     if (!notes.trim()) {
@@ -49,7 +71,7 @@ function MeetingRoom() {
       return;
     }
 
-    const generated = `
+    setSummary(`
 Meeting Summary:
 • ${notes}
 
@@ -60,40 +82,120 @@ Action Items:
 
 Key Decision:
 • Vartalap meeting discussion completed successfully
-`;
-
-    setSummary(generated);
-    setNotifications((prev) => ["AI meeting summary generated", ...prev]);
+`);
   };
+
+  const copyMeetingLink = async () => {
+    await navigator.clipboard.writeText(window.location.href);
+    alert("Meeting link copied!");
+  };
+
+  if (!joined) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          background: "linear-gradient(135deg, #020617, #111827, #1e1b4b)",
+          color: "white",
+          display: "grid",
+          placeItems: "center",
+          fontFamily: "Poppins, Arial, sans-serif",
+          padding: "25px",
+        }}
+      >
+        <div
+          style={{
+            width: "420px",
+            maxWidth: "95%",
+            padding: "35px",
+            borderRadius: "28px",
+            background: "rgba(255,255,255,0.1)",
+            border: "1px solid rgba(255,255,255,0.18)",
+            boxShadow: "0 25px 80px rgba(0,0,0,0.35)",
+            backdropFilter: "blur(18px)",
+            textAlign: "center",
+          }}
+        >
+          <h1 style={{ marginBottom: "10px" }}>🎥 Join Meeting</h1>
+
+          <p style={{ color: "#cbd5e1", marginBottom: "22px" }}>
+            Meeting ID: <b>{meetingId}</b>
+          </p>
+
+          <input
+            value={participantName}
+            onChange={(e) => setParticipantName(e.target.value)}
+            placeholder="Enter your name"
+            style={{
+              width: "100%",
+              padding: "14px",
+              borderRadius: "14px",
+              border: "none",
+              outline: "none",
+              marginBottom: "15px",
+              fontSize: "16px",
+            }}
+          />
+
+          <button
+            onClick={() => joinMeeting()}
+            disabled={loading}
+            style={{
+              width: "100%",
+              padding: "14px",
+              borderRadius: "14px",
+              border: "none",
+              cursor: "pointer",
+              background: "linear-gradient(135deg, #7c3aed, #06b6d4)",
+              color: "white",
+              fontWeight: "bold",
+              fontSize: "16px",
+            }}
+          >
+            {loading ? "Joining..." : "Join Meeting"}
+          </button>
+
+          <button
+            onClick={() => navigate("/dashboard")}
+            style={{
+              width: "100%",
+              padding: "12px",
+              borderRadius: "14px",
+              border: "none",
+              cursor: "pointer",
+              background: "#334155",
+              color: "white",
+              marginTop: "12px",
+            }}
+          >
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: "flex", height: "100vh", width: "100%" }}>
-      <div style={{ flex: 3 }}>
-        <JitsiMeeting
-          domain="meet.jit.si"
-          roomName={roomId || "vartalap-room"}
-          userInfo={{
-            displayName: user.name || "Vartalap User",
-            email: user.email || "",
-          }}
-          configOverwrite={{
-            startWithAudioMuted: false,
-            startWithVideoMuted: false,
-          }}
-          interfaceConfigOverwrite={{
-            SHOW_JITSI_WATERMARK: false,
-            SHOW_WATERMARK_FOR_GUESTS: false,
-          }}
-          getIFrameRef={(iframeRef) => {
-            iframeRef.style.height = "100vh";
-            iframeRef.style.width = "100%";
-          }}
-        />
+      <div style={{ flex: 3, background: "#020617" }}>
+        <LiveKitRoom
+          token={token}
+          serverUrl={serverUrl}
+          connect={true}
+          video={true}
+          audio={true}
+          data-lk-theme="default"
+          style={{ height: "100vh" }}
+          onDisconnected={() => navigate("/dashboard")}
+        >
+          <VideoConference />
+        </LiveKitRoom>
       </div>
 
       <div
         style={{
           flex: 1,
+          minWidth: "320px",
           padding: "20px",
           background: "#0f172a",
           color: "white",
@@ -117,7 +219,24 @@ Key Decision:
           ← Back to Dashboard
         </button>
 
-        <h2>🎥 Meeting Room</h2>
+        <button
+          onClick={copyMeetingLink}
+          style={{
+            width: "100%",
+            padding: "10px",
+            borderRadius: "10px",
+            border: "none",
+            cursor: "pointer",
+            background: "#2563eb",
+            color: "white",
+            marginBottom: "15px",
+            fontWeight: "bold",
+          }}
+        >
+          🔗 Copy Meeting Link
+        </button>
+
+        <h2>🎥 Vartalap Meeting</h2>
 
         <div
           style={{
@@ -128,72 +247,7 @@ Key Decision:
           }}
         >
           <p style={{ margin: 0, color: "#cbd5e1" }}>Meeting ID</p>
-          <strong>{roomId}</strong>
-        </div>
-
-        <div
-          style={{
-            padding: "15px",
-            borderRadius: "14px",
-            background: "#1e293b",
-            marginBottom: "18px",
-          }}
-        >
-          <h3>👥 Participants</h3>
-
-          {participants.length === 0 ? (
-            <p style={{ color: "#94a3b8" }}>No participants yet</p>
-          ) : (
-            participants.map((person, index) => (
-              <div
-                key={index}
-                style={{
-                  padding: "10px",
-                  borderRadius: "10px",
-                  background: "#0f172a",
-                  marginBottom: "10px",
-                }}
-              >
-                <strong>🟢 {person.name}</strong>
-                <p style={{ margin: "5px 0", color: "#94a3b8" }}>
-                  {person.email || "No email"}
-                </p>
-                <small>
-                  {index === 0 ? "Host" : person.status || "Participant"}
-                </small>
-              </div>
-            ))
-          )}
-
-          <p style={{ color: "#cbd5e1" }}>
-            Total Participants: {participants.length}
-          </p>
-        </div>
-
-        <div
-          style={{
-            padding: "15px",
-            borderRadius: "14px",
-            background: "#1e293b",
-            marginBottom: "18px",
-          }}
-        >
-          <h3>🔔 Notifications</h3>
-
-          {notifications.map((note, index) => (
-            <div
-              key={index}
-              style={{
-                padding: "9px",
-                borderRadius: "10px",
-                background: "#0f172a",
-                marginBottom: "8px",
-                color: "#cbd5e1",
-              }}
-            >
-              ✅ {note}
-            </div>
-          ))}
+          <strong>{meetingId}</strong>
         </div>
 
         <div
