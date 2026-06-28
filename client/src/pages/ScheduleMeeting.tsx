@@ -15,7 +15,7 @@ function ScheduleMeeting() {
     e.preventDefault();
 
     try {
-      await axios.post("http://localhost:5000/api/schedule", {
+      await axios.post("https://vartalap-backend-hz3z.onrender.com/api/schedule", {
         title,
         date,
         time,
