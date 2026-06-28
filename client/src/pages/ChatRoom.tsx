@@ -1,10 +1,26 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import EmojiPicker from "emoji-picker-react";
+import {
+  FiArrowLeft,
+  FiDownload,
+  FiFile,
+  FiMic,
+  FiPaperclip,
+  FiSend,
+  FiSmile,
+  FiSquare,
+  FiUsers,
+} from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
+import "./ChatRoom.css";
 
 const socket = io("https://vartalap-backend-hz3z.onrender.com");
 
 function ChatRoom() {
+  const navigate = useNavigate();
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<any[]>([]);
   const [showEmoji, setShowEmoji] = useState(false);
@@ -31,24 +47,17 @@ function ChatRoom() {
         );
 
         if (exists) return prev;
-
         return [...prev, data];
       });
     });
 
-    socket.on("online_users", (users) => {
-      setOnlineUsers(users);
-    });
+    socket.on("online_users", (users) => setOnlineUsers(users));
 
     socket.on("user_typing", (data) => {
-      if (data.sender !== user.name) {
-        setTypingUser(data.sender);
-      }
+      if (data.sender !== user.name) setTypingUser(data.sender);
     });
 
-    socket.on("user_stop_typing", () => {
-      setTypingUser("");
-    });
+    socket.on("user_stop_typing", () => setTypingUser(""));
 
     return () => {
       socket.off("receive_message");
@@ -57,6 +66,10 @@ function ChatRoom() {
       socket.off("user_stop_typing");
     };
   }, []);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const addOwnMessage = (data: any) => {
     setMessages((prev) => [...prev, data]);
@@ -104,7 +117,6 @@ function ChatRoom() {
 
   const handleFileShare = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-
     if (!file) return;
 
     const reader = new FileReader();
@@ -129,22 +141,15 @@ function ChatRoom() {
 
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-      });
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
       const recorder = new MediaRecorder(stream);
       const chunks: BlobPart[] = [];
 
-      recorder.ondataavailable = (e) => {
-        chunks.push(e.data);
-      };
+      recorder.ondataavailable = (e) => chunks.push(e.data);
 
       recorder.onstop = () => {
-        const blob = new Blob(chunks, {
-          type: "audio/webm",
-        });
-
+        const blob = new Blob(chunks, { type: "audio/webm" });
         const reader = new FileReader();
 
         reader.onload = () => {
@@ -174,240 +179,168 @@ function ChatRoom() {
 
   const stopRecording = () => {
     if (!mediaRecorder) return;
-
     mediaRecorder.stop();
     setIsRecording(false);
   };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #020617, #111827, #1e1b4b)",
-        color: "white",
-        padding: "30px",
-        fontFamily: "Poppins, Arial, sans-serif",
-      }}
-    >
-      <h1>💬 Vartalap Chat</h1>
+    <div className="chat-page">
+      <aside className="chat-sidebar">
+        <button className="chat-back" onClick={() => navigate("/dashboard")}>
+          <FiArrowLeft /> Dashboard
+        </button>
 
-      <div
-        style={{
-          marginBottom: "15px",
-          padding: "12px",
-          borderRadius: "14px",
-          background: "rgba(255,255,255,0.08)",
-        }}
-      >
-        <strong>🟢 Online Users: {onlineUsers.length}</strong>
-
-        <div
-          style={{
-            marginTop: "8px",
-            display: "flex",
-            gap: "8px",
-            flexWrap: "wrap",
-          }}
-        >
-          {onlineUsers.map((u, index) => (
-            <span
-              key={index}
-              style={{
-                background: "#22c55e",
-                padding: "6px 10px",
-                borderRadius: "20px",
-                fontSize: "13px",
-              }}
-            >
-              {u.name}
-            </span>
-          ))}
+        <div className="chat-brand">
+          <div className="chat-brand-icon">V</div>
+          <div>
+            <h2>Vartalap Chat</h2>
+            <p>Team conversation room</p>
+          </div>
         </div>
-      </div>
 
-      {typingUser && (
-        <p style={{ color: "#93c5fd" }}>✍️ {typingUser} is typing...</p>
-      )}
+        <div className="online-card">
+          <div className="online-head">
+            <FiUsers />
+            <strong>Online Users</strong>
+            <span>{onlineUsers.length}</span>
+          </div>
 
-      <div
-        style={{
-          height: "430px",
-          overflowY: "auto",
-          background: "rgba(255,255,255,0.08)",
-          padding: "18px",
-          borderRadius: "18px",
-          border: "1px solid rgba(255,255,255,0.12)",
-        }}
-      >
-        {messages.map((msg, index) => (
-          <div
-            key={index}
-            style={{
-              marginBottom: "14px",
-              padding: "12px",
-              borderRadius: "14px",
-              background:
-                msg.sender === user.name
-                  ? "linear-gradient(135deg, #7c3aed, #06b6d4)"
-                  : "#1f2937",
-            }}
-          >
-            <strong>{msg.sender}</strong>
-
-            {msg.type === "file" ? (
-              <div style={{ marginTop: "10px" }}>
-                {msg.fileType?.startsWith("image/") && (
-                  <img
-                    src={msg.fileUrl}
-                    alt={msg.fileName}
-                    style={{
-                      maxWidth: "220px",
-                      borderRadius: "12px",
-                      display: "block",
-                      marginBottom: "10px",
-                    }}
-                  />
-                )}
-
-                <p>📎 {msg.fileName}</p>
-
-                <a
-                  href={msg.fileUrl}
-                  download={msg.fileName}
-                  style={{
-                    color: "white",
-                    background: "#22c55e",
-                    padding: "8px 12px",
-                    borderRadius: "8px",
-                    textDecoration: "none",
-                    display: "inline-block",
-                  }}
-                >
-                  Download
-                </a>
-              </div>
-            ) : msg.type === "audio" ? (
-              <div style={{ marginTop: "10px" }}>
-                <p>🎤 Voice Note</p>
-                <audio controls>
-                  <source src={msg.audio} type="audio/webm" />
-                </audio>
-              </div>
+          <div className="online-list">
+            {onlineUsers.length === 0 ? (
+              <p>No users online</p>
             ) : (
-              <p style={{ margin: "8px 0", fontSize: "17px" }}>
-                {msg.message}
-              </p>
+              onlineUsers.map((u, index) => (
+                <div className="online-user" key={index}>
+                  <div>{u.name?.charAt(0)?.toUpperCase() || "U"}</div>
+                  <span>{u.name || "User"}</span>
+                </div>
+              ))
             )}
-
-            <small>{msg.time}</small>
           </div>
-        ))}
-      </div>
+        </div>
+      </aside>
 
-      <div
-        style={{
-          position: "relative",
-          marginTop: "15px",
-          display: "flex",
-          gap: "10px",
-        }}
-      >
-        <button
-          onClick={() => setShowEmoji(!showEmoji)}
-          style={{
-            padding: "12px",
-            borderRadius: "12px",
-            border: "none",
-            cursor: "pointer",
-            fontSize: "20px",
-          }}
-        >
-          😊
-        </button>
+      <main className="chat-main">
+        <header className="chat-header">
+          <div>
+            <p>Workspace Room</p>
+            <h1>General Chat</h1>
+          </div>
 
-        {showEmoji && (
-          <div
-            style={{
-              position: "absolute",
-              bottom: "60px",
-              left: "0",
-              zIndex: 10,
-            }}
-          >
-            <EmojiPicker
-              onEmojiClick={(emojiData) =>
-                setMessage((prev) => prev + emojiData.emoji)
-              }
+          <div className="chat-status">
+            <span></span>
+            Live Room
+          </div>
+        </header>
+
+        <section className="chat-window">
+          {messages.length === 0 ? (
+            <div className="empty-chat">
+              <h2>Start the conversation</h2>
+              <p>Send a message, file, image or voice note.</p>
+            </div>
+          ) : (
+            messages.map((msg, index) => {
+              const isMine = msg.sender === user.name;
+
+              return (
+                <div
+                  key={index}
+                  className={isMine ? "message-row mine" : "message-row"}
+                >
+                  <div className="message-avatar">
+                    {msg.sender?.charAt(0)?.toUpperCase() || "U"}
+                  </div>
+
+                  <div className="message-bubble">
+                    <div className="message-meta">
+                      <strong>{msg.sender}</strong>
+                      <small>{msg.time}</small>
+                    </div>
+
+                    {msg.type === "file" ? (
+                      <div className="file-message">
+                        {msg.fileType?.startsWith("image/") && (
+                          <img src={msg.fileUrl} alt={msg.fileName} />
+                        )}
+
+                        <div className="file-info">
+                          <FiFile />
+                          <span>{msg.fileName}</span>
+                        </div>
+
+                        <a href={msg.fileUrl} download={msg.fileName}>
+                          <FiDownload /> Download
+                        </a>
+                      </div>
+                    ) : msg.type === "audio" ? (
+                      <div className="audio-message">
+                        <p>Voice Note</p>
+                        <audio controls>
+                          <source src={msg.audio} type="audio/webm" />
+                        </audio>
+                      </div>
+                    ) : (
+                      <p>{msg.message}</p>
+                    )}
+                  </div>
+                </div>
+              );
+            })
+          )}
+
+          {typingUser && (
+            <div className="typing-indicator">{typingUser} is typing...</div>
+          )}
+
+          <div ref={bottomRef}></div>
+        </section>
+
+        <footer className="chat-composer">
+          {showEmoji && (
+            <div className="emoji-panel">
+              <EmojiPicker
+                onEmojiClick={(emojiData) =>
+                  setMessage((prev) => prev + emojiData.emoji)
+                }
+              />
+            </div>
+          )}
+
+          <button onClick={() => setShowEmoji(!showEmoji)}>
+            <FiSmile />
+          </button>
+
+          <label>
+            <FiPaperclip />
+            <input
+              type="file"
+              accept="image/*,.pdf,.doc,.docx,.ppt,.pptx"
+              onChange={handleFileShare}
             />
-          </div>
-        )}
+          </label>
 
-        <button
-          onClick={isRecording ? stopRecording : startRecording}
-          style={{
-            padding: "12px",
-            borderRadius: "12px",
-            border: "none",
-            cursor: "pointer",
-            background: isRecording ? "#ef4444" : "white",
-            color: isRecording ? "white" : "#111827",
-            fontSize: "20px",
-          }}
-        >
-          {isRecording ? "⏹" : "🎤"}
-        </button>
+          <button
+            className={isRecording ? "recording" : ""}
+            onClick={isRecording ? stopRecording : startRecording}
+          >
+            {isRecording ? <FiSquare /> : <FiMic />}
+          </button>
 
-        <label
-          style={{
-            padding: "12px",
-            borderRadius: "12px",
-            border: "none",
-            cursor: "pointer",
-            background: "white",
-            color: "#111827",
-            fontSize: "20px",
-          }}
-        >
-          📎
           <input
-            type="file"
-            accept="image/*,.pdf,.doc,.docx,.ppt,.pptx"
-            onChange={handleFileShare}
-            style={{ display: "none" }}
+            value={message}
+            onChange={(e) => handleTyping(e.target.value)}
+            placeholder="Type your message..."
+            onKeyDown={(e) => {
+              if (e.key === "Enter") sendMessage();
+            }}
           />
-        </label>
 
-        <input
-          value={message}
-          onChange={(e) => handleTyping(e.target.value)}
-          placeholder="Type message..."
-          onKeyDown={(e) => {
-            if (e.key === "Enter") sendMessage();
-          }}
-          style={{
-            flex: 1,
-            padding: "14px",
-            borderRadius: "12px",
-            border: "none",
-            outline: "none",
-          }}
-        />
-
-        <button
-          onClick={sendMessage}
-          style={{
-            padding: "14px 22px",
-            borderRadius: "12px",
-            border: "none",
-            cursor: "pointer",
-            background: "#22c55e",
-            color: "white",
-            fontWeight: "bold",
-          }}
-        >
-          Send
-        </button>
-      </div>
+          <button className="send-btn" onClick={sendMessage}>
+            <FiSend />
+          </button>
+        </footer>
+      </main>
     </div>
   );
 }
