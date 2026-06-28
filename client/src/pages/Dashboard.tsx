@@ -10,7 +10,6 @@ import {
   FiMoon,
   FiPlus,
   FiSearch,
-  FiSettings,
   FiSun,
   FiUploadCloud,
   FiUser,
@@ -156,7 +155,8 @@ function Dashboard() {
           <button onClick={() => navigate("/translator")}><FiZap /> Translator</button>
           <button onClick={() => navigate("/history")}><FiFileText /> History</button>
           <button onClick={toggleTheme}>{darkMode ? <FiSun /> : <FiMoon />} Theme</button>
-          <button><FiSettings /> Settings</button>
+          <button onClick={() => navigate("/profile")}>👤 Profile</button>
+          <button onClick={() => navigate("/settings")}>⚙️ Settings</button>
         </nav>
 
         <div className="vd-side-profile">
