@@ -13,10 +13,13 @@ function Login() {
     e.preventDefault();
 
     try {
-      const res = await axios.post("https://vartalap-backend-hz3z.onrender.com", {
-        email,
-        password,
-      });
+      const res = await axios.post(
+  "https://vartalap-backend-hz3z.onrender.com/api/auth/login",
+  {
+    email,
+    password,
+  }
+);
 
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
